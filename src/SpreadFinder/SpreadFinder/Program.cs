@@ -1,6 +1,10 @@
+using System.Globalization;
 using Infrastructure.Settings;
+using Infrastructure.Extensions;
 using NLog.Extensions.Logging;
 using NLog.Web;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +14,6 @@ builder.Configuration
     .AddJsonFile("appsettings.nlog.json")
     .AddEnvironmentVariables();
 
-builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 
 NLog.LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));
@@ -20,6 +23,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.Configure<KafkaTopics>(builder.Configuration.GetSection(nameof(KafkaTopics)));
+builder.Services.Configure<SpreadCalculationJobSettings>(builder.Configuration.GetSection(nameof(SpreadCalculationJobSettings)));
+
+builder.Services.AddDal(builder.Configuration);
+builder.Services.AddExternalServices();
+builder.Services.AddAppServices();
+builder.Services.AddKafka(builder.Configuration);
+builder.Services.AddBackgroundServices();
+builder.Services.AddQuartzJobs();
 
 var app = builder.Build();
 

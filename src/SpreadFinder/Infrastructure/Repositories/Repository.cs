@@ -1,10 +1,21 @@
-﻿using System.Transactions;
+﻿using System.Data;
+using System.Transactions;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
+using Npgsql.NameTranslation;
+using IsolationLevel = System.Transactions.IsolationLevel;
 
 namespace Infrastructure.Repositories;
 
 public class Repository
 {
+    private readonly NpgsqlDataSource _source;
+
+    public Repository(NpgsqlDataSource source)
+    {
+        _source = source;
+    }
+    
     public TransactionScope CreateTransactionScope()
     {
         return new TransactionScope(
@@ -15,6 +26,6 @@ public class Repository
 
     protected NpgsqlConnection GetConnection()
     {
-        return new NpgsqlConnection("");
+        return _source.CreateConnection();
     }
 }

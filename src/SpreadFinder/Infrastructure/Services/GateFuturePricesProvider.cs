@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Dal;
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.HttpClients.Interfaces;
 using Infrastructure.Interfaces;
 
@@ -37,10 +38,10 @@ public class GateFuturePricesProvider : IGateFuturePricesProvider
             };
         }
 
-        var lastPrice = await _futurePricesRepository.GetLastAvailablePrice(contract, ExchangeName, token);
+        var lastPrice = await _futurePricesRepository.GetLastAvailablePrice(contract, ExchangeName, DateTimeOffset.UtcNow.AddDays(-1), token);
         if (lastPrice is null)
         {
-            throw new Exception();
+            throw new FuturePriceNotFoundException($"Price not found for {contract}");
         }
 
         return lastPrice;
