@@ -1,0 +1,6 @@
+@SpreadFinder_HostAddress = http://localhost:5018
+
+GET {{SpreadFinder_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
