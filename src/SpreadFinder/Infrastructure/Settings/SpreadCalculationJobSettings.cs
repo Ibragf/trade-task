@@ -2,6 +2,7 @@
 
 public class SpreadCalculationJobSettings
 {
+    public string JobCron { get; set; }
     public SpreadCalculationPair[] CalculationPairs { get; set; }
 }
 

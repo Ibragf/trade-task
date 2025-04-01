@@ -30,7 +30,7 @@ builder.Services.AddExternalServices();
 builder.Services.AddAppServices();
 builder.Services.AddKafka(builder.Configuration);
 builder.Services.AddBackgroundServices();
-builder.Services.AddQuartzJobs();
+builder.Services.AddQuartzJobs(builder.Configuration);
 
 var app = builder.Build();
 

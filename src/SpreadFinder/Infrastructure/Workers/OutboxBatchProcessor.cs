@@ -26,19 +26,24 @@ public class OutboxBatchProcessor : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        try
+        while (true)
         {
-            while (true)
+            try
             {
-                stoppingToken.ThrowIfCancellationRequested();
-                await Process(stoppingToken);
-
                 await Task.Delay(1000, stoppingToken);
+                stoppingToken.ThrowIfCancellationRequested();
+
+                await Process(stoppingToken);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Outbox processor stopped: {ex.Message}", ex.StackTrace);
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning($"Outbox processing canceled");
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Outbox processor stopped: {ex.Message}", ex.StackTrace);
+            }
         }
     }
 
@@ -58,7 +63,7 @@ public class OutboxBatchProcessor : BackgroundService
         var ids = messages.Select(x => x.Id).ToArray();
         await outboxRepository.MarkProcessed(ids, token);
         
-        _logger.LogInformation($"Outbox processed {messages.Length} messages in {sw.ElapsedMilliseconds}");
+        _logger.LogInformation($"Outbox processed {messages.Length} messages in {sw.ElapsedMilliseconds} ms");
     }
 
     private async Task SendBatchMessages()

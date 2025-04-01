@@ -81,10 +81,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddQuartzJobs(this IServiceCollection services)
+    public static IServiceCollection AddQuartzJobs(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddQuartz(q =>
         {
+            var settings = configuration.GetSection(nameof(SpreadCalculationJobSettings)).Get<SpreadCalculationJobSettings>();
             var jobKey = new JobKey(nameof(SpreadCalculationJob<GateSpreadService>));
             
             q.AddJob<SpreadCalculationJob<GateSpreadService>>(opts => opts.WithIdentity(jobKey));
@@ -92,7 +93,7 @@ public static class ServiceCollectionExtensions
             q.AddTrigger(opts => opts
                 .ForJob(jobKey)
                 .WithIdentity($"{nameof(SpreadCalculationJob<GateSpreadService>)}-trigger")
-                .WithCronSchedule("*/3 * * * * ?")); // Every 3 seconds
+                .WithCronSchedule(settings.JobCron));
         });
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
